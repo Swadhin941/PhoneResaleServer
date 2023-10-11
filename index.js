@@ -259,19 +259,20 @@ async function run() {
         });
 
         app.get('/selected-category/:brandName', async (req, res) => {
-            // const searchText = req.query.searchText;
-            // // console.log(searchText);
-            // if (searchText!=="") {
-            //     const result = await Products.find({ $text: { $search: searchText } }).toArray();
-            //     console.log(result);
-            //     return res.send(result);
-            // }
-            // else {
+            const searchText = req.query.searchText;
+            console.log(1,searchText);
+            if (searchText!=="") {
+                console.log(searchText);
+                const result = await Products.find({ $text: { $search: searchText } }).toArray();
+                console.log(result);
+                return res.send(result);
+            }
+            else {
             const brandName = req.params.brandName;
             const skipNumber = parseInt(req.query.pageNum) * 4;
             const result = await Products.find({ brandName: brandName }).skip(skipNumber).limit(4).toArray();
             return res.send(result);
-            // }
+            }
 
 
 
@@ -470,9 +471,9 @@ async function run() {
                     total_amount: req.body.totalCost,
                     currency: 'BDT',
                     tran_id: req.body.transactionId,
-                    success_url: `https://phone-resale-server-swadhin941.vercel.app/payment/success/${transactionId}`,
-                    fail_url: `https://phone-resale-server-swadhin941.vercel.app/payment/fail/${transactionId}`,
-                    cancel_url: `https://phone-resale-server-swadhin941.vercel.app/payment/fail/${transactionId}`,
+                    success_url: `http://localhost:5000//payment/success/${transactionId}`,
+                    fail_url: `http://localhost:5000//payment/fail/${transactionId}`,
+                    cancel_url: `http://localhost:5000//payment/fail/${transactionId}`,
                     ipn_url: '',
                     shipping_method: 'Courier',
                     product_name: 'Mobile',
@@ -513,7 +514,7 @@ async function run() {
             const transactionId = req.params.transactionId;
             const deleteOrder = await Orders.deleteOne({ transactionId });
             if (deleteOrder.deletedCount >= 1) {
-                return res.redirect(`https://phoneresale-d5194.web.app/payment/fail?trxID=${transactionId}&&loop=${Date.now()}`)
+                return res.redirect(`http://localhost:3000/payment/fail?trxID=${transactionId}&&loop=${Date.now()}`)
             }
         })
 
@@ -521,7 +522,7 @@ async function run() {
             // console.log(req.params.transactionId);
             const checkTrxID = await Orders.findOne({ transactionId: req.params.transactionId });
             if (checkTrxID?.paid) {
-                return res.redirect(`https://phoneresale-d5194.web.app/orders?transactionId=${req.params.transactionId}`)
+                return res.redirect(`http://localhost:3000/orders?transactionId=${req.params.transactionId}`)
             }
             else {
                 const date = new Date();
@@ -571,7 +572,7 @@ async function run() {
 
                     const order = await Orders.findOne({ transactionId: req.params.transactionId });
                     mailReady(order);
-                    return res.redirect(`https://phoneresale-d5194.web.app/orders?transactionId=${req.params.transactionId}`)
+                    return res.redirect(`http://localhost:3000/orders?transactionId=${req.params.transactionId}`)
                 }
             }
 
