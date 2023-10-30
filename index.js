@@ -18,7 +18,7 @@ const is_live = false;
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.acejzkz.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wxzkvmx.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -104,7 +104,9 @@ async function run() {
         //Seller Check
         app.get('/sellerCheck/:email', async (req, res) => {
             const email = req.params.email;
+
             const result = await User.find({ email: email }).project({ role: 1 }).toArray();
+            // console.log(result);
             res.send({ isSeller: result[0].role === 'seller' });
         })
 
@@ -123,46 +125,77 @@ async function run() {
             res.send("Server is running");
         })
         // app.get('/postSomething', async (req, res) => {
+        //     // const modelName= [
+        //     //     {
+        //     //         Name: "Samsung"
+        //     //     },
+        //     //     {
+        //     //         Name: "Vivo"
+        //     //     },
+        //     //     {
+        //     //         Name: "Oppo"
+        //     //     },
+        //     //     {
+        //     //         Name: "I-Phone"
+        //     //     },
+        //     //     {
+        //     //         Name: "Asus"
+        //     //     },
+        //     //     {
+        //     //         Name: "OnePlus"
+        //     //     },
+        //     //     {
+        //     //         Name: "Realme"
+        //     //     },
+        //     //     {
+        //     //         Name: "Infinix"
+        //     //     },
+        //     //     {
+        //     //         Name: "Huawei"
+        //     //     }
+        //     // ]
+        //     // const result = await categories.insertMany(modelName)
+        //     // res.send(result);
         //     const phoneData = [
         //         {
-        //             Brand: "Asus",
-        //             Model: "ROG 3"
+        //             Brand: "Huawei",
+        //             Model: "Huawei Y541"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "ROG II"
+        //             Brand: "Huawei",
+        //             Model: "Huawei Y625"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "Zenfone"
+        //             Brand: "Huawei",
+        //             Model: "Huawei Mate 8"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "ROG 5"
+        //             Brand: "Huawei",
+        //             Model: "Huawei P9"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "Zenfone 5Z"
+        //             Brand: "Huawei",
+        //             Model: "Huawei P9 Lite"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "Zenfone 3 max"
+        //             Brand: "Huawei",
+        //             Model: "Huawei P9 plus"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "Zenfone max (M2)"
+        //             Brand: "Huawei",
+        //             Model: "Huawei Nova Plus"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "Zenfone 8"
+        //             Brand: "Huawei",
+        //             Model: "Huawei Mate 9"
         //         },
         //         {
-        //             Brand: "Asus",
-        //             Model: "Zenfone 6"
+        //             Brand: "Huawei",
+        //             Model: "Huawei P8 Lite"
         //         },
 
         //     ]
-        //     const result = await phoneModels.insertMany(phoneData);
+        //     // const result = await phoneModels.insertMany(phoneData);
         //     // const result = await phoneModels.find({}).toArray();
         //     res.send(result);
         // });
@@ -170,13 +203,13 @@ async function run() {
         //User post or add new user to database
 
         app.post('/user', async (req, res) => {
-            const { email, fullName, role } = req.body;
+            const { email, fullName, role, emailStatus } = req.body;
             const findOut = await User.find({ email: email }).toArray();
             if (findOut.length >= 1) {
                 return res.send({ acknowledged: true });
             }
             else {
-                const userPost = await User.insertOne({ email: email, fullName: fullName, role: role });
+                const userPost = await User.insertOne({ email: email, fullName: fullName, role: role, emailStatus: emailStatus });
                 return res.send(userPost);
             }
         });
@@ -242,7 +275,7 @@ async function run() {
 
         app.post('/productPost', verifyJWT, verifySeller, async (req, res) => {
             const data = req.body;
-            if (email !== req.decoded.email) {
+            if (req.query.user !== req.decoded.email) {
                 return res.status(403).send({ message: "Forbidden Access" });
             }
             const result = await Products.insertOne(data);
@@ -251,9 +284,6 @@ async function run() {
 
         app.get('/modelName/:brand', verifyJWT, verifySeller, async (req, res) => {
             const brandName = req.params.brand;
-            if (email !== req.decoded.email) {
-                return res.status(403).send({ message: "Forbidden Access" });
-            }
             const result = await phoneModels.find({ Brand: brandName }).toArray();
             res.send(result);
         });
